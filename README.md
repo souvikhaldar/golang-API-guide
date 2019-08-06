@@ -1,6 +1,17 @@
 # Tutorial for building a RESTful HTTP API in Golang    
 
-1. Install postgresql on your system. Follow this [link](https://www.postgresqltutorial.com/install-postgresql/) 
+1. Create a directory in the `$GOPATH/src/<vcs-name>/<username>/golang-server` and name it anything you want. I’m naming in `golang-server`. 
+The above path is standard golang practice, but after the onset of `go modules` you can create the directory anywhere you want.  
+
+2.  Build these three directories structure inside `golang-server`:  
+`mkdir pkg cmd scripts`  
+(This directory structure is not compulsory but a good practice.)  
+To learn the reason for this directory structure you can explore this [repository](https://github.com/golang-standards/project-layout).  
+TL;DR /cmd stores to binary executables, /pkg stores the packages, /scripts stores the required scripts for various use cases.  
+3. Create a file called `main.go` (you can name it whatever). This is where the `main` function resides, inside `/cmd/golang-server/`  
+4. We can store data anywhere, but for persistent storage a database is always a good option. In this guide, we will be using [PostgreSQL](https://www.postgresql.org/). 
+So let's setup the database connection now.  
+    1. Install postgresql on your system. Follow this [link](https://www.postgresqltutorial.com/install-postgresql/) 
     2. Run `psql -U postgres` on the terminal. (NOTE: `postgres` is a default role automatically created, if it's not you need to create it. Also, my commands are for mac, but other OSs should be pretty similar)  
     3. Create a new database. `create database guide`, I'm naming it guide, you can name it anything.  
     4. Create a simple table with two columns `customer_id` and `customer_name` by running `create table customer(customer_id int,customer_name text);` after connecting the `guide` database (do `\c guide`)  
@@ -133,6 +144,8 @@ func fetchCustomers(w http.ResponseWriter, r *http.Request) {
 }
 ```
 In the above code, we are querying for all the customer records, accessing them one by one and appending to a slice and finally serializing them into JSON using the `Marshall` method.   
+
+
 
 
 **Link to [API documentation](https://documenter.getpostman.com/view/1921454/SVYrsdwf) is here.**
