@@ -80,9 +80,50 @@ func updateCustomer(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Succesfully updated user")
 }
 
+func deleteCustomer(w http.ResponseWriter, r *http.Request) {
+	v := mux.Vars(r)
+	id := v["id"]
+	fmt.Println("Deleting user: ", id)
+	if _, err := dbDriver.Exec("DELETE FROM customer where customer_id=$1", id); err != nil {
+		fmt.Println("Unable to delete the customer: ", err)
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	fmt.Fprintln(w, "Successfully deleted!")
+}
+
+func fetchCustomers(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Fetching all customers")
+	rows, err := dbDriver.Query("SELECT * from customer")
+	if err != nil {
+		fmt.Println("Unable to read the table: ", err)
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	var customers []customer
+	defer rows.Close()
+	for rows.Next() {
+		var c customer
+		if err := rows.Scan(&c.CustomerID, &c.CustomerName); err != nil {
+			fmt.Println("Unable to scan")
+		}
+		customers = append(customers, c)
+	}
+	customerJSON, err := json.Marshal(customers)
+	if err != nil {
+		fmt.Println("Unable to marshall the data: ", err)
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	fmt.Println("Customers: ", customers)
+	fmt.Fprintln(w, string(customerJSON))
+}
+
 func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/customer", addCustomer).Methods("POST")
 	router.HandleFunc("/customer/{id}", updateCustomer).Methods("PUT")
+	router.HandleFunc("/customer/{id}", deleteCustomer).Methods("DELETE")
+	router.HandleFunc("/customer", fetchCustomers).Methods("GET")
 	log.Fatal(http.ListenAndServe(":8192", router))
 }
